@@ -4,16 +4,47 @@ terraform {
       source  = "hashicorp/aws"
       version = "~> 5.68.0"
     }
+    tls = {
+      source  = "hashicorp/tls"
+      version = "~> 4.0"
+    }
   }
 }
 
 provider "aws" {
   region = var.aws_region
+  profile = var.aws_profile
+}
+
+# Generar clave privada RSA
+resource "tls_private_key" "n8n_key" {
+  algorithm = "RSA"
+  rsa_bits  = 4096
+}
+
+# Crear AWS Key Pair usando la clave pública generada
+resource "aws_key_pair" "n8n_key_pair" {
+  key_name   = "n8n-key"
+  public_key = tls_private_key.n8n_key.public_key_openssh
+}
+
+# Guardar la clave privada en un archivo local
+resource "local_file" "private_key" {
+  content  = tls_private_key.n8n_key.private_key_pem
+  filename = "n8n-key.pem"
+  file_permission = "0600"
 }
 
 resource "aws_security_group" "n8n_sg" {
   name        = "n8n-sg"
   description = "Allow HTTP, HTTPS, and n8n ports"
+
+  ingress {
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
 
   ingress {
     from_port   = 80
@@ -47,6 +78,7 @@ resource "aws_security_group" "n8n_sg" {
 resource "aws_instance" "n8n" {
   ami             = var.ami_id
   instance_type   = var.instance_type
+  key_name        = aws_key_pair.n8n_key_pair.key_name
   security_groups = [aws_security_group.n8n_sg.name]
 
   user_data = <<-EOF

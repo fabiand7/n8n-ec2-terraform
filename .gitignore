@@ -1,0 +1,31 @@
+# Archivos de llave privada
+*.pem
+*.ppk
+
+# Archivos de estado
+*.tfstate
+*.tfstate.backup
+.terraform.tfstate.lock.info
+.terraform.lock.hcl
+
+# Directorio .terraform
+/.terraform/
+
+# Archivos de plan
+*.tfplan
+
+# Archivos de variables
+*.tfvars
+*.auto.tfvars
+
+# Archivos de registro
+*.log
+
+# Archivos de configuración de la CLI
+terraform.rc
+
+# Archivos de anulaciones
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
