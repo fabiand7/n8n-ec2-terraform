@@ -18,12 +18,22 @@ variable "instance_type" {
   default     = "t3.micro"
 }
 
-variable "n8n_user" {
-  description = "n8n basic auth username"
-  default     = "admin"
+variable "n8n_domain" {
+  description = "n8n domain"
+  default     = "https://example.com/"
 }
 
-variable "n8n_password" {
-  description = "n8n basic auth password"
-  default     = "changeme"
+variable "volume_size" {
+  description = "Size of the root EBS volume in GB"
+  type        = number
+  default     = 30
+}
+
+variable "volume_type" {
+  description = "EBS volume type"
+  default     = "gp3"
+  validation {
+    condition     = contains(["gp2", "gp3", "io1", "io2"], var.volume_type)
+    error_message = "Volume type must be one of: gp2, gp3, io1, io2."
+  }
 }

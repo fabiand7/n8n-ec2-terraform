@@ -18,7 +18,7 @@ output "key_pair_name" {
   value       = aws_key_pair.n8n_key_pair.key_name
 }
 
-output "private_key_file" {
-  description = "Path to the private key file"
-  value       = "n8n-key.pem"
+output "ebs_volume_id" {
+  description = "ID of the EBS volume"
+  value       = aws_ebs_volume.n8n_volume.id
 }

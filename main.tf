@@ -81,14 +81,21 @@ resource "aws_instance" "n8n" {
   key_name        = aws_key_pair.n8n_key_pair.key_name
   security_groups = [aws_security_group.n8n_sg.name]
 
+  # Configurar el volumen raíz
+  root_block_device {
+    volume_type           = var.volume_type
+    volume_size           = var.volume_size
+    encrypted             = true
+    delete_on_termination = true
+  }
+
   user_data = <<-EOF
     #!/bin/bash
     apt-get update
     apt-get install -y docker.io docker-compose
     systemctl start docker
     systemctl enable docker
-    mkdir -p /data/n8n
-    docker run -d --name n8n --restart=always -p 5678:5678  -e N8N_BASIC_AUTH_ACTIVE=true -e N8N_SECURE_COOKIE=false -e N8N_BASIC_AUTH_USER=${var.n8n_user}  -e N8N_BASIC_AUTH_PASSWORD=${var.n8n_password} n8nio/n8n
+    sudo docker run -d --restart unless-stopped -it --name n8n -p 5678:5678 -e N8N_HOST="n8n.dominio.com" -e WEBHOOK_TUNNEL_URL=${var.n8n_domain} -e WEBHOOK_URL=${var.n8n_domain} -v ~/.n8n:/root/.n8n n8nio/n8n
   EOF
 
   tags = {
